@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -7,16 +9,21 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// --- Core Models ---
+
 model User {
-  id                    Int              @id @default(autoincrement())
-  name                  String?
-  email                 String           @unique
-  role                  Role
+  id                   Int              @id @default(autoincrement())
+  name                 String?
+  email                String           @unique
+  role                 Role
   appointmentsAsPatient Appointment[]    @relation("PatientAppointments")
   appointmentsAsDoctor  Appointment[]    @relation("DoctorAppointments")
-  medicalHistories      MedicalHistory[]
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  medicalHistories     MedicalHistory[]
+  // Next‑Auth relations:
+  accounts             Account[]
+  sessions             Session[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 }
 
 enum Role {
@@ -26,17 +33,17 @@ enum Role {
 }
 
 model Appointment {
-  id          Int               @id @default(autoincrement())
-  patient     User              @relation("PatientAppointments", fields: [patientId], references: [id])
-  patientId   Int
-  doctor      User              @relation("DoctorAppointments", fields: [doctorId], references: [id])
-  doctorId    Int
-  scheduledAt DateTime
-  status      AppointmentStatus @default(PENDING)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  Prescription Prescription[]
+  id           Int          @id @default(autoincrement())
+  patient      User         @relation("PatientAppointments", fields: [patientId], references: [id])
+  patientId    Int
+  doctor       User         @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  doctorId     Int
+  scheduledAt  DateTime
+  status       AppointmentStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  // Optional back-reference for prescription
+  prescription Prescription?
 }
 
 enum AppointmentStatus {
@@ -57,9 +64,42 @@ model MedicalHistory {
 model Prescription {
   id            Int         @id @default(autoincrement())
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
-  appointmentId Int
+  appointmentId Int         @unique
   medication    String
   dosage        String
   instructions  String
   createdAt     DateTime    @default(now())
+}
+model Account {
+  id                 Int       @id @default(autoincrement())
+  userId             Int
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?   @db.Text
+  access_token       String?   @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?   @db.Text
+  session_state      String?
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int       @id @default(autoincrement())
+  sessionToken String    @unique
+  userId       Int
+  expires      DateTime
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String    @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
