@@ -9,17 +9,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// --- Core Models ---
-
 model User {
   id                   Int              @id @default(autoincrement())
   name                 String?
   email                String           @unique
-  role                 Role
+  emailVerified        DateTime?
+  image                String?          // Add this field for the user's profile image
+  role                 Role?            @default(PATIENT)
   appointmentsAsPatient Appointment[]    @relation("PatientAppointments")
   appointmentsAsDoctor  Appointment[]    @relation("DoctorAppointments")
   medicalHistories     MedicalHistory[]
-  // Next‑Auth relations:
   accounts             Account[]
   sessions             Session[]
   createdAt            DateTime         @default(now())
