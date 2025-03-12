@@ -26,17 +26,17 @@ export default function Dashboard(){
         Sign Out 
       </button>
       <nav className="my-4">
-        <Link href="/appointments">
-          <a className="mr-4 underline text-blue-500"> Book Appointment</a>
-        </Link>
-        <Link href="/medical-history">
-          <a className="mr-4 underline text-blue-500">Medical History</a>
-        </Link>
-        <Link href="prescriptions">
-          <a className="mr-4 underline text-blue-500">Prescriptions</a>
-        </Link>
-      </nav>
-      <h2 className="text-xl font-semibold">Your Appointments</h2>
+  <Link href="/appointments" className="mr-4 underline text-blue-500">
+    Book Appointment
+  </Link>
+  <Link href="/medical-history" className="mr-4 underline text-blue-500">
+    Medical History
+  </Link>
+  <Link href="/prescriptions" className="underline text-blue-500">
+    Prescriptions
+  </Link>
+</nav>
+       <h2 className="text-xl font-semibold">Your Appointments</h2>
       {appointments.length === 0 ? (
         <p>No appointments found.</p>
       ) : (
