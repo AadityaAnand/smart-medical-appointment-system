@@ -1,7 +1,7 @@
-import { data } from "autoprefixer";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Chatbot from "../components/Chatbot";
 
 export default function Dashboard(){
   const {data: session, status} = useSession();
@@ -49,6 +49,9 @@ export default function Dashboard(){
           ))}
         </ul>
       )}
+      <div className="mt-8">
+        <Chatbot />
+      </div>
     </div>
   );
 }
