@@ -36,13 +36,13 @@ async function handleGetPrescription(req: NextApiRequest, res: NextApiResponse, 
 }
 
 async function handleCreatePrescription(req: NextApiRequest, res: NextApiResponse, user: any) {
-    try{
-        if(user.role!=="DOCTOR"){
-            return res.status(403).json({message: "Only doctors can create prescriptions"});
+    try {
+        if (user.role !== "DOCTOR") {
+          return res.status(403).json({ message: "Only doctors can create prescriptions" });
         }
-        const {appointmentId, medication, dosage, instructions} = req.body;
-        if (!appointmentId||!medication||dosage|| !instructions){
-            return res.status(400).json({message: "Missing fields"})
+        const { appointmentId, medication, dosage, instructions } = req.body;
+        if (!appointmentId || !medication || !dosage || !instructions) {
+          return res.status(400).json({ message: "Missing fields" });
         }
         const prescription = await prisma.prescription.create({
             data: {

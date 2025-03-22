@@ -22,26 +22,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
-async function handleGetAppointment(req: NextApiRequest, res: NextApiResponse, user: any, id: string){
-    try{
-        const appointemnt = await prisma.appointment.findUnique({
-            where: {id: Number(id)},
-            include: {patient: true, doctor:true},
-        });
-
-        if (!appointemnt) return res.status(404).json({message: "Appointment not found"});
-        if (user.role == "PATIENT" && appointemnt.patient.email !== user.email){
-            return res.status(403).json({message: "Forbidden"});
-        }
-        if (user.role == "DOCTOR" && appointemnt.patient.email !== user.email){
-            return res.status(403).json({message: "Forbidden"});
-        }
-        return res.status(200).json(appointemnt);
-    } catch(error){
-        console.error("Error fetching app[ointment:", error);
-        return res.status(500).json({message: "Error fetchin appointment"});
+async function handleGetAppointment(req: NextApiRequest, res: NextApiResponse, user: any, id: string) {
+    try {
+      const appointment = await prisma.appointment.findUnique({
+        where: { id: Number(id) },
+        include: { patient: true, doctor: true },
+      });
+  
+      if (!appointment) return res.status(404).json({ message: "Appointment not found" });
+      if (user.role === "PATIENT" && appointment.patient.email !== user.email) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      if (user.role === "DOCTOR" && appointment.doctor.email !== user.email) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      return res.status(200).json(appointment);
+    } catch (error) {
+      console.error("Error fetching appointment:", error);
+      return res.status(500).json({ message: "Error fetching appointment" });
     }
-}
+  }
 
 async function handleUpdateAppointment(req: NextApiRequest, res: NextApiResponse, user: any, id: string) {
     try{

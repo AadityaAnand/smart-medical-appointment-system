@@ -30,8 +30,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ", "
     )}. Based on these symptoms, what type of doctor should the patient consult? Respond with one specialty only (e.g., Cardiologist, Dermatologist, Neurologist, etc.) and include a disclaimer that your advice is for informational purposes only.`;
 
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo", 
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a helpful medical assistant." },
         { role: "user", content: prompt },
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       temperature: 0.7,
     });
 
-    const recommendedSpecialty = response.data.choices[0].message?.content.trim();
+    const recommendedSpecialty = response.choices[0].message?.content.trim();
     return res.status(200).json({ recommendedSpecialty });
   } catch (error) {
     console.error("Error in advanced recommendation:", error);
