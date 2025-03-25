@@ -1,33 +1,32 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 
 interface ChatMessage {
   id: string;
-  type: "user" | "bot";
+  type: 'user' | 'bot';
   content: string;
   timestamp: Date;
 }
 
-export default function Chatbot() {
+const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Add welcome message when component mounts
   useEffect(() => {
     setMessages([
       {
-        id: "welcome",
-        type: "bot",
-        content: "Hello! I'm your medical assistant. How can I help you today?",
+        id: 'welcome',
+        type: 'bot',
+        content: 'Hello! I\'m your medical assistant. How can I help you today?',
         timestamp: new Date(),
       },
     ]);
   }, []);
 
-  // Auto-scroll to bottom when messages change
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const generateUniqueId = () => {
@@ -40,60 +39,46 @@ export default function Chatbot() {
     const userMessage = input.trim();
     const userMessageObj: ChatMessage = {
       id: generateUniqueId(),
-      type: "user",
+      type: 'user',
       content: userMessage,
       timestamp: new Date(),
     };
     
     setMessages((prev) => [...prev, userMessageObj]);
-    setInput("");
+    setInput('');
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/ai/chatbot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
+      const res = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userMessage }),
       });
       
-      let data;
-      try {
-        // Try to parse the JSON response regardless of status code
-        data = await res.json();
-      } catch (parseError) {
-        // If JSON parsing fails, create a generic error message
-        data = { botReply: "Error: Couldn't parse server response" };
-      }
+      const data = await res.json();
       
       if (!res.ok) {
-        // Instead of throwing, we'll create an error message from the response
-        const botMessage: ChatMessage = {
-          id: generateUniqueId(),
-          type: "bot",
-          content: data.message || "Sorry, I encountered an error processing your request.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-      } else {
-        // If response is successful, add the bot's reply
-        const botMessage: ChatMessage = {
-          id: generateUniqueId(),
-          type: "bot",
-          content: data.botReply,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
+        throw new Error(data.message || 'Error processing your request');
       }
-    } catch (error) {
-      // This will catch network errors or other exceptions
-      console.error("Chatbot error:", error);
-      const errorMessage: ChatMessage = {
+      
+      const botMessage: ChatMessage = {
         id: generateUniqueId(),
-        type: "bot",
-        content: "Sorry, I couldn't connect to the server. Please check your connection and try again.",
+        type: 'bot',
+        content: data.botReply,
         timestamp: new Date(),
       };
+      
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Chatbot error:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: generateUniqueId(),
+        type: 'bot',
+        content: 'Sorry, I encountered a problem. Please try again later.',
+        timestamp: new Date(),
+      };
+      
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -101,7 +86,7 @@ export default function Chatbot() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -123,21 +108,21 @@ export default function Chatbot() {
           <div 
             key={msg.id} 
             className={`mb-3 max-w-3/4 ${
-              msg.type === "user" ? "ml-auto" : "mr-auto"
+              msg.type === 'user' ? 'ml-auto' : 'mr-auto'
             }`}
           >
             <div 
               className={`p-3 rounded-lg ${
-                msg.type === "user" 
-                  ? "bg-blue-500 text-white rounded-br-none" 
-                  : "bg-white border rounded-bl-none"
+                msg.type === 'user' 
+                  ? 'bg-blue-500 text-white rounded-br-none' 
+                  : 'bg-white border rounded-bl-none'
               }`}
             >
               {msg.content}
             </div>
             <div 
               className={`text-xs mt-1 ${
-                msg.type === "user" ? "text-right" : "text-left"
+                msg.type === 'user' ? 'text-right' : 'text-left'
               } text-gray-500`}
             >
               {formatTime(msg.timestamp)}
@@ -169,12 +154,12 @@ export default function Chatbot() {
           />
           <button
             className={`px-4 py-2 rounded text-white ${
-              isLoading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+              isLoading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
             }`}
             onClick={handleSend}
             disabled={isLoading}
           >
-            {isLoading ? "..." : "Send"}
+            {isLoading ? '...' : 'Send'}
           </button>
         </div>
         <p className="text-xs text-gray-500 mt-1">
@@ -183,4 +168,6 @@ export default function Chatbot() {
       </div>
     </div>
   );
-}
+};
+
+export default Chatbot;
